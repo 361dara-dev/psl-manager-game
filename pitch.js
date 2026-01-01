@@ -1,3 +1,7 @@
+/* =========================
+   PITCH DEFINITIONS
+========================= */
+
 const pitchTypes = {
   flat: {
     battingBoost: 1.15,
@@ -19,20 +23,32 @@ const pitchTypes = {
   }
 };
 
+/* =========================
+   HOME PITCH SELECTION UI
+========================= */
+
 function renderHomePitchSelection(team) {
+  if (!team.pitch) team.pitch = "flat"; // default pitch
+
   document.getElementById("home").innerHTML = `
     <h2>${team.name}</h2>
     <h3>${team.stadium}</h3>
 
-    <label>Prepare Pitch:</label>
+    <label><b>Prepare Pitch:</b></label>
     <select onchange="setPitch(this.value)">
-      <option value="flat">Flat</option>
-      <option value="green">Green</option>
-      <option value="dusty">Dusty</option>
+      <option value="flat" ${team.pitch === "flat" ? "selected" : ""}>Flat</option>
+      <option value="green" ${team.pitch === "green" ? "selected" : ""}>Green</option>
+      <option value="dusty" ${team.pitch === "dusty" ? "selected" : ""}>Dusty</option>
     </select>
   `;
 }
 
+/* =========================
+   APPLY PITCH
+========================= */
+
 function setPitch(pitch) {
+  if (!userTeam) return;
   userTeam.pitch = pitch;
 }
+
