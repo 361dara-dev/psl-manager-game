@@ -1,31 +1,59 @@
 const retentionRules = {
   maxRetentions: 5,
-  costMultipliers: [1.4, 1.3, 1.2, 1.1, 1.05], // per retention order
-  wageIncrease: 1.15 // 15% wage hike per season retained
+  costMultipliers: [1.4, 1.3, 1.2, 1.1, 1.05],
+  wageIncrease: 1.15,
+  maxRetentionSeasons: 4
 };
-function applyRetentions(team, retainedPlayers) {
-  retainedPlayers.forEach((player, index) => {
-    let multiplier = retentionRules.costMultipliers[index];
 
-    // Increase base price (auction value)
+/* =========================
+   APPLY RETENTIONS
+========================= */
+
+function applyRetentions(team, retainedPlayers) {
+
+  // Sort by player value (strongest first)
+  retainedPlayers.sort(
+    (a, b) => (b.batting + b.bowling) - (a.batting + a.bowling)
+  );
+
+  retainedPlayers.forEach((player, index) => {
+    let multiplier = retentionRules.costMultipliers[index] || 1.05;
+
+    // Cap retention length
+    if (player.retentionCount >= retentionRules.maxRetentionSeasons) return;
+
+    // Increase auction value
     player.basePrice = +(player.basePrice * multiplier).toFixed(2);
 
     // Wage inflation
     player.wage = +(player.wage * retentionRules.wageIncrease).toFixed(2);
-    player.wage = Math.min(player.wage, 3); // cap £3m
+    player.wage = Math.min(player.wage, 3);
 
     player.retained = true;
     player.retentionCount++;
   });
 
-  // Release non-retained players
+  // RELEASE non-retained players to auction pool
+  let released = team.players.filter(p => !p.retained);
+  auctionFreeAgents.push(...released);
+
   team.players = team.players.filter(p => p.retained);
 }
+
+/* =========================
+   AI RETENTIONS
+========================= */
+
 function aiRetainPlayers(team) {
   let candidates = getRetentionCandidates(team);
   let retained = candidates.slice(0, retentionRules.maxRetentions);
   applyRetentions(team, retained);
 }
+
+/* =========================
+   HUMAN RETENTIONS
+========================= */
+
 function confirmRetentions() {
   let checks = document.querySelectorAll("#squad input:checked");
   let retained = [];
@@ -42,11 +70,23 @@ function confirmRetentions() {
 
   applyRetentions(userTeam, retained);
 }
-function prepareForAuction(teams) {
+
+/* =========================
+   RESET FLAGS (NEW SEASON)
+========================= */
+
+function resetRetentionFlags(teams) {
   teams.forEach(team => {
-    team.players.forEach(p => p.retained = false);
+    team.players.forEach(p => {
+      p.retained = false;
+    });
   });
 }
+
+/* =========================
+   BUDGET NORMALIZATION
+========================= */
+
 function normalizeBudgets(teams) {
   teams.forEach(t => {
     if (t.budget > 110) t.budget = 110;
@@ -54,15 +94,20 @@ function normalizeBudgets(teams) {
   });
 }
 
+/* =========================
+   RETENTION UI
+========================= */
+
 function renderRetentionUI(team) {
   let candidates = getRetentionCandidates(team);
-  let html = `<h2>Retain Players</h2>`;
 
-  candidates.slice(0, 8).forEach(p => {
+  let html = `<h2>Retain Players (Max 5)</h2>`;
+
+  candidates.slice(0, 10).forEach(p => {
     html += `
       <label>
         <input type="checkbox" value="${p.name}">
-        ${p.name} (£${p.wage}m)
+        ${p.name} — £${p.wage}m (Retained ${p.retentionCount}x)
       </label><br>
     `;
   });
