@@ -1,46 +1,77 @@
-/***********************
- * TAB SYSTEM (FIXED)
- ***********************/
-function showTab(tabId) {
-  document.querySelectorAll(".tab").forEach(tab => {
-    tab.style.display = "none";
-  });
+/*************************
+ BASIC TAB SYSTEM
+**************************/
+function showTab(tab) {
+  document.querySelectorAll(".tab").forEach(t => t.style.display = "none");
+  const el = document.getElementById(tab);
+  if (el) el.style.display = "block";
 
-  const active = document.getElementById(tabId);
-  if (active) active.style.display = "block";
-
-  // Auto-render when tab opens
-  if (tabId === "schedule") renderSchedule();
-  if (tabId === "standings") renderStandings();
-  if (tabId === "history") renderHistory();
-  if (tabId === "budget") renderBudget();
+  if (tab === "schedule") renderSchedule();
+  if (tab === "standings") renderStandings();
+  if (tab === "stats") showStats(teams);
+  if (tab === "history") renderHistory();
+  if (tab === "budget") renderBudget();
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  showTab("home");
-  renderHome();
+showTab("home");
+
+/*************************
+ GAME STATE
+**************************/
+let gameState = {
+  season: 1,
+  history: {
+    champions: [],
+    tables: [],
+    retirements: []
+  }
+};
+
+/*************************
+ INIT TEAMS (CRITICAL)
+**************************/
+teams.forEach(t => {
+  t.players = t.players || [];
+  t.played = 0;
+  t.won = 0;
+  t.lost = 0;
+  t.points = 0;
+  t.nrr = 0;
+  t.pitch = t.pitch || "flat";
 });
 
-
-/***********************
- * HOME
- ***********************/
-function renderHome() {
-  document.getElementById("home").innerHTML = `
-    <h2>Welcome to PSL Manager</h2>
-    <p>Manage your team, buy players, play matches and win titles.</p>
-    <p><b>Season:</b> ${gameState?.season || 1}</p>
-  `;
-}
-
-
-/***********************
- * SCHEDULE
- ***********************/
+/*************************
+ FIXTURES
+**************************/
+let fixtures = [];
 let currentFixtureIndex = 0;
 
+function regenerateSchedule() {
+  fixtures = [];
+  for (let i = 0; i < teams.length; i++) {
+    for (let j = i + 1; j < teams.length; j++) {
+      fixtures.push({ home: teams[i], away: teams[j] });
+      fixtures.push({ home: teams[j], away: teams[i] });
+    }
+  }
+}
+
+regenerateSchedule();
+
+/*************************
+ HOME TAB
+**************************/
+document.getElementById("home").innerHTML = `
+  <h2>Welcome to PSL Manager</h2>
+  <p>Season ${gameState.season}</p>
+  <p>Select a tab on the left to begin.</p>
+`;
+
+/*************************
+ SCHEDULE
+**************************/
 function renderSchedule() {
-  let html = `<h2>Schedule</h2>`;
+  let html = `<h2>Fixtures</h2>`;
 
   fixtures.forEach((f, i) => {
     html += `
@@ -56,17 +87,14 @@ function renderSchedule() {
 
 function playNextMatch() {
   if (currentFixtureIndex >= fixtures.length) {
-    endSeason(teams);
-    currentFixtureIndex = 0;
-    renderSchedule();
+    endSeason();
     return;
   }
 
-  const fixture = fixtures[currentFixtureIndex];
-  const result = simulateMatch(fixture.home, fixture.away);
+  const f = fixtures[currentFixtureIndex];
+  const result = simulateMatch(f.home, f.away);
 
-  updateTable(fixture.home, fixture.away, result.winner);
-  matchData = result;
+  updateTable(f.home, f.away, result.winner);
 
   showTab("match");
   renderScorecard(result.innings1);
@@ -74,20 +102,17 @@ function playNextMatch() {
   currentFixtureIndex++;
 }
 
-
-/***********************
- * MATCH
- ***********************/
+/*************************
+ MATCH
+**************************/
 let matchData = null;
 let ballPointer = 0;
 
 function playBallUI() {
   if (!matchData) return;
-
-  const log = matchData.innings1.log;
+  let log = matchData.innings1.log;
   if (ballPointer < log.length) {
-    document.getElementById("commentary").innerText +=
-      "\n" + log[ballPointer];
+    document.getElementById("commentary").innerText += "\n" + log[ballPointer];
     ballPointer++;
   }
 }
@@ -98,98 +123,51 @@ function playOverUI() {
 
 function simulateFull() {
   if (!matchData) return;
-
   document.getElementById("commentary").innerText =
-    matchData.innings1.log.join("\n") +
-    "\n\nWinner: " + matchData.winner;
-
-  renderScorecard(matchData.innings1);
+    matchData.innings1.log.join("\n") + "\nWinner: " + matchData.winner;
 }
 
-
-/***********************
- * SCORECARD
- ***********************/
-function renderScorecard(innings) {
-  let batHTML = `
-    <tr>
-      <th>Batter</th><th>R</th><th>B</th><th>SR</th>
-    </tr>`;
-
-  for (let name in innings.battingCard) {
-    const b = innings.battingCard[name];
-    const sr = b.balls ? ((b.runs / b.balls) * 100).toFixed(1) : "0.0";
-
-    batHTML += `
-      <tr>
-        <td>${name}${b.out ? "" : "*"}</td>
-        <td>${b.runs}</td>
-        <td>${b.balls}</td>
-        <td>${sr}</td>
-      </tr>`;
-  }
-
-  document.getElementById("battingTable").innerHTML = batHTML;
-
-  let bowlHTML = `
-    <tr>
-      <th>Bowler</th><th>O</th><th>R</th><th>W</th><th>ER</th>
-    </tr>`;
-
-  for (let name in innings.bowlingCard) {
-    const b = innings.bowlingCard[name];
-    const overs = (b.balls / 6).toFixed(1);
-    const er = b.balls ? (b.runs / (b.balls / 6)).toFixed(2) : "0.00";
-
-    bowlHTML += `
-      <tr>
-        <td>${name}</td>
-        <td>${overs}</td>
-        <td>${b.runs}</td>
-        <td>${b.wickets}</td>
-        <td>${er}</td>
-      </tr>`;
-  }
-
-  document.getElementById("bowlingTable").innerHTML = bowlHTML;
-}
-
-
-/***********************
- * STANDINGS
- ***********************/
+/*************************
+ STANDINGS
+**************************/
 function renderStandings() {
-  const table = [...teams].sort(
-    (a, b) => b.points - a.points || b.nrr - a.nrr
+  let table = [...teams].sort((a, b) =>
+    b.points - a.points || b.nrr - a.nrr
   );
 
   let html = `
     <h2>Standings</h2>
     <table border="1" cellpadding="5">
       <tr>
-        <th>Team</th><th>P</th><th>W</th><th>L</th><th>Pts</th><th>NRR</th>
-      </tr>`;
+        <th>Team</th>
+        <th>P</th>
+        <th>W</th>
+        <th>L</th>
+        <th>Pts</th>
+        <th>NRR</th>
+      </tr>
+  `;
 
   table.forEach(t => {
     html += `
       <tr>
         <td>${t.name}</td>
-        <td>${t.played || 0}</td>
-        <td>${t.won || 0}</td>
-        <td>${t.lost || 0}</td>
-        <td>${t.points || 0}</td>
-        <td>${(t.nrr || 0).toFixed(2)}</td>
-      </tr>`;
+        <td>${t.played}</td>
+        <td>${t.won}</td>
+        <td>${t.lost}</td>
+        <td>${t.points}</td>
+        <td>${t.nrr.toFixed(2)}</td>
+      </tr>
+    `;
   });
 
-  html += `</table>`;
+  html += "</table>";
   document.getElementById("standings").innerHTML = html;
 }
 
-
-/***********************
- * HISTORY
- ***********************/
+/*************************
+ HISTORY
+**************************/
 function renderHistory() {
   let html = `<h2>PSL History</h2>`;
 
@@ -205,14 +183,38 @@ function renderHistory() {
   document.getElementById("history").innerHTML = html;
 }
 
-
-/***********************
- * BUDGET
- ***********************/
+/*************************
+ BUDGET
+**************************/
 function renderBudget() {
   let html = `<h2>Team Budgets</h2>`;
   teams.forEach(t => {
     html += `<p>${t.name}: £${t.budget}m</p>`;
   });
   document.getElementById("budget").innerHTML = html;
+}
+
+/*************************
+ SEASON END
+**************************/
+function endSeason() {
+  let table = [...teams].sort((a, b) =>
+    b.points - a.points || b.nrr - a.nrr
+  );
+
+  gameState.history.champions.push({
+    season: gameState.season,
+    winner: table[0].name
+  });
+
+  gameState.season++;
+
+  teams.forEach(t => {
+    t.played = t.won = t.lost = t.points = t.nrr = 0;
+  });
+
+  regenerateSchedule();
+  currentFixtureIndex = 0;
+
+  alert("Season Complete!");
 }
