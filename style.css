@@ -1,32 +1,170 @@
-
+/* =====================
+   GLOBAL
+   ===================== */
 body {
   margin: 0;
-  font-family: Arial;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
   display: flex;
-  background: #0f172a;
-  color: white;
+  background: linear-gradient(135deg, #0f172a, #020617);
+  color: #e5e7eb;
 }
 
+/* =====================
+   SIDEBAR
+   ===================== */
 #sidebar {
-  width: 220px;
-  background: #020617;
-  padding: 10px;
+  width: 230px;
+  background: rgba(2, 6, 23, 0.9);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-right: 1px solid #1e293b;
 }
 
 #sidebar button {
   width: 100%;
-  margin: 5px 0;
-  padding: 10px;
-  background: #1e293b;
-  color: white;
-  border: none;
+  padding: 12px;
+  background: #020617;
+  color: #e5e7eb;
+  border: 1px solid #1e293b;
+  border-radius: 10px;
   cursor: pointer;
+  font-size: 14px;
+  text-align: left;
+  transition: all 0.2s ease;
 }
 
+#sidebar button:hover {
+  background: #1e293b;
+  transform: translateX(4px);
+}
+
+#sidebar button.active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: white;
+}
+
+/* =====================
+   CONTENT AREA
+   ===================== */
 #content {
   flex: 1;
-  padding: 20px;
+  padding: 24px;
+  overflow-y: auto;
 }
 
-.tab { display: none; }
+/* =====================
+   TABS
+   ===================== */
+.tab {
+  display: none;
+  animation: fadeUp 0.25s ease;
+}
+
+.tab.active {
+  display: block;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =====================
+   HEADINGS
+   ===================== */
+h1, h2, h3 {
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+h2 {
+  margin-bottom: 12px;
+}
+
+/* =====================
+   CARDS (matches, stats, players)
+   ===================== */
+.card {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid #1e293b;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+}
+
+/* =====================
+   BUTTONS
+   ===================== */
+button {
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+button.secondary {
+  background: #334155;
+}
+
+button.secondary:hover {
+  background: #475569;
+}
+
+/* =====================
+   LIST ITEMS
+   ===================== */
+.list-item {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #020617;
+  border: 1px solid #1e293b;
+  margin-bottom: 8px;
+}
+
+/* =====================
+   SCORECARD / STATS
+   ===================== */
+.scorecard {
+  background: #020617;
+  border-radius: 12px;
+  padding: 12px;
+  border: 1px solid #1e293b;
+  line-height: 1.6;
+}
+
+/* =====================
+   SCROLLBAR (SUBTLE)
+   ===================== */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
 
