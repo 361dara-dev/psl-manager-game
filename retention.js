@@ -53,3 +53,20 @@ function normalizeBudgets(teams) {
     if (t.budget < 55) t.budget += 5;
   });
 }
+
+function renderRetentionUI(team) {
+  let candidates = getRetentionCandidates(team);
+  let html = `<h2>Retain Players</h2>`;
+
+  candidates.slice(0, 8).forEach(p => {
+    html += `
+      <label>
+        <input type="checkbox" value="${p.name}">
+        ${p.name} (£${p.wage}m)
+      </label><br>
+    `;
+  });
+
+  html += `<button onclick="confirmRetentions()">Confirm</button>`;
+  document.getElementById("squad").innerHTML = html;
+}
