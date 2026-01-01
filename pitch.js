@@ -18,3 +18,21 @@ const pitchTypes = {
     wicketChance: 1.1
   }
 };
+
+function renderHomePitchSelection(team) {
+  document.getElementById("home").innerHTML = `
+    <h2>${team.name}</h2>
+    <h3>${team.stadium}</h3>
+
+    <label>Prepare Pitch:</label>
+    <select onchange="setPitch(this.value)">
+      <option value="flat">Flat</option>
+      <option value="green">Green</option>
+      <option value="dusty">Dusty</option>
+    </select>
+  `;
+}
+
+function setPitch(pitch) {
+  userTeam.pitch = pitch;
+}
