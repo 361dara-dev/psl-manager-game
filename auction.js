@@ -4,7 +4,8 @@ let auctionState = {
   currentBid: 0,
   highestBidder: null,
   activePlayer: null,
-  completed: false
+  completed: false,
+  players: []
 };
 
 const auctionRounds = [
@@ -15,19 +16,33 @@ const auctionRounds = [
   { name: "Round 5 – Budget Picks", filter: p => p.basePrice <= 0.8 }
 ];
 
+function canBuyPlayer(team, player) {
+  let overseasCount = team.players.filter(p => p.overseas).length;
+  if (player.overseas && overseasCount >= 6) return false;
+  if (team.players.length >= 20) return false;
+  if (team.budget < auctionState.currentBid) return false;
+  if (team.wageUsed + player.wage > team.wage) return false;
+  return true;
+}
+
 function startAuctionRound(playersPool) {
   let round = auctionRounds[auctionState.round];
   auctionState.players = playersPool.filter(round.filter);
   auctionState.currentPlayerIndex = 0;
   loadNextAuctionPlayer();
 }
+
 function loadNextAuctionPlayer() {
   if (auctionState.currentPlayerIndex >= auctionState.players.length) {
     auctionState.round++;
+
     if (auctionState.round >= auctionRounds.length) {
       auctionState.completed = true;
+      document.getElementById("auction").innerHTML =
+        "<h2>Auction Completed</h2>";
       return;
     }
+
     startAuctionRound(players);
     return;
   }
@@ -40,6 +55,7 @@ function loadNextAuctionPlayer() {
 
   renderAuctionUI();
 }
+
 function renderAuctionUI() {
   let p = auctionState.activePlayer;
 
@@ -55,59 +71,41 @@ function renderAuctionUI() {
     <button onclick="finalizeAuction()">Sell Player</button>
   `;
 }
-function humanBid() {
-  let team = userTeam;
 
-  if (team.budget < auctionState.currentBid + 0.1) return;
+function humanBid() {
+  if (!canBuyPlayer(userTeam, auctionState.activePlayer)) return;
 
   auctionState.currentBid += 0.1;
-  auctionState.highestBidder = team.name;
+  auctionState.highestBidder = userTeam.name;
 
   aiBidResponse();
   renderAuctionUI();
 }
+
 function aiBidResponse() {
   teams.forEach(team => {
     if (team.name === userTeam.name) return;
-    if (team.budget < auctionState.currentBid + 0.1) return;
+    if (!canBuyPlayer(team, auctionState.activePlayer)) return;
 
-    let interest =
-      auctionState.activePlayer.basePrice *
-      (team.budget / 100) *
-      Math.random();
+    let aggression = Math.random() * 1.2;
 
-    if (interest > auctionState.currentBid) {
+    if (auctionState.currentBid * aggression <
+        auctionState.activePlayer.basePrice * 1.5) {
       auctionState.currentBid += 0.1;
       auctionState.highestBidder = team.name;
     }
   });
 }
+
 function finalizeAuction() {
   let buyer = teams.find(t => t.name === auctionState.highestBidder);
 
-  if (!buyer) {
-    auctionState.currentPlayerIndex++;
-    loadNextAuctionPlayer();
-    return;
+  if (buyer && canBuyPlayer(buyer, auctionState.activePlayer)) {
+    buyer.budget -= auctionState.currentBid;
+    buyer.wageUsed += auctionState.activePlayer.wage;
+    buyer.players.push(auctionState.activePlayer);
   }
-
-  // Budget + wage checks
-  if (buyer.budget < auctionState.currentBid) return;
-  if (buyer.wageUsed + auctionState.activePlayer.wage > buyer.wage) return;
-
-  buyer.budget -= auctionState.currentBid;
-  buyer.wageUsed += auctionState.activePlayer.wage;
-  buyer.players.push(auctionState.activePlayer);
 
   auctionState.currentPlayerIndex++;
   loadNextAuctionPlayer();
 }
-
-finalizeAuction(function canBuyPlayer(team, player) {
-  let overseasCount =
-    team.players.filter(p => p.overseas).length;
-
-  if (player.overseas && overseasCount >= 6) return false;
-  if (team.players.length >= 20) return false;
-  return true;
-})
