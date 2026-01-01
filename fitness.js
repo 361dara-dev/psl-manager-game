@@ -1,9 +1,17 @@
 function applyFatigue(player) {
-  player.fatigue += 8;
-  player.fitness -= player.fatigue * 0.05;
+  player.fatigue = Math.min(100, player.fatigue + 8);
 
-  if (player.fitness < 50 && Math.random() < 0.05) {
-    causeInjury(player);
+  player.fitness = Math.max(
+    0,
+    player.fitness - player.fatigue * 0.05
+  );
+
+  // Injury chance scales with fitness
+  if (player.fitness < 60) {
+    const injuryChance = (60 - player.fitness) * 0.002; // max ~10%
+    if (Math.random() < injuryChance) {
+      causeInjury(player);
+    }
   }
 }
 
@@ -13,3 +21,4 @@ function recoverFatigue(player) {
     player.fitness = Math.min(100, player.fitness + 5);
   }
 }
+
