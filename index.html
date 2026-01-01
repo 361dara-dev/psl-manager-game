@@ -24,19 +24,33 @@
   <div id="auction" class="tab"></div>
   <div id="squad" class="tab"></div>
   <div id="schedule" class="tab"></div>
-  <div id="match" class="tab"></div>
+
+  <div id="match" class="tab">
+    <h2>Match Center</h2>
+    <button onclick="playBallUI()">Play Ball</button>
+    <button onclick="playOverUI()">Play Over</button>
+    <button onclick="simulateFull()">Sim Match</button>
+
+    <h3>Commentary</h3>
+    <pre id="commentary"></pre>
+
+    <h3>Batting Scorecard</h3>
+    <table id="battingTable"></table>
+
+    <h3>Bowling Figures</h3>
+    <table id="bowlingTable"></table>
+  </div>
+
   <div id="stats" class="tab"></div>
   <div id="standings" class="tab"></div>
   <div id="budget" class="tab"></div>
   <div id="history" class="tab"></div>
 </div>
 
-<link rel="stylesheet" href="style.css">
-
+<!-- JS FILES -->
 <script src="teams.js"></script>
 <script src="players.js"></script>
 <script src="schedule.js"></script>
-
 <script src="auction.js"></script>
 <script src="matchEngine.js"></script>
 <script src="finance.js"></script>
@@ -48,60 +62,7 @@
 <script src="aging.js"></script>
 <script src="retirement.js"></script>
 <script src="retention.js"></script>
-
 <script src="app.js"></script>
 
-
-
-
-<div id="match" class="tab">
-  <h2>Match Center</h2>
-
-  <button onclick="playBallUI()">Play Ball</button>
-  <button onclick="playOverUI()">Play Over</button>
-  <button onclick="simulateFull()">Sim Match</button>
-
-  <h3>Commentary</h3>
-  <pre id="commentary"></pre>
-
-  <h3>Batting Scorecard</h3>
-  <table id="battingTable"></table>
-
-  <h3>Bowling Figures</h3>
-  <table id="bowlingTable"></table>
-</div>
-function renderHomePitchSelection(team) {
-  document.getElementById("home").innerHTML = `
-    <h2>${team.name}</h2>
-    <h3>${team.stadium}</h3>
-
-    <label>Prepare Pitch:</label>
-    <select onchange="setPitch(this.value)">
-      <option value="flat">Flat</option>
-      <option value="green">Green</option>
-      <option value="dusty">Dusty</option>
-    </select>
-  `;
-}
-
-function setPitch(pitch) {
-  userTeam.pitch = pitch;
-}
-function renderRetentionUI(team) {
-  let candidates = getRetentionCandidates(team);
-  let html = `<h2>Retain Players</h2>`;
-
-  candidates.slice(0, 8).forEach(p => {
-    html += `
-      <label>
-        <input type="checkbox" value="${p.name}">
-        ${p.name} (£${p.wage}m)
-      </label><br>
-    `;
-  });
-
-  html += `<button onclick="confirmRetentions()">Confirm</button>`;
-  document.getElementById("squad").innerHTML = html;
-}
-
-
+</body>
+</html>
