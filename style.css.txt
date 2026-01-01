@@ -1,0 +1,32 @@
+
+body {
+  margin: 0;
+  font-family: Arial;
+  display: flex;
+  background: #0f172a;
+  color: white;
+}
+
+#sidebar {
+  width: 220px;
+  background: #020617;
+  padding: 10px;
+}
+
+#sidebar button {
+  width: 100%;
+  margin: 5px 0;
+  padding: 10px;
+  background: #1e293b;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+#content {
+  flex: 1;
+  padding: 20px;
+}
+
+.tab { display: none; }
+

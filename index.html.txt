@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PSL Manager</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="sidebar">
+  <h2>PSL Manager</h2>
+  <button onclick="showTab('home')">Home</button>
+  <button onclick="showTab('auction')">Auction</button>
+  <button onclick="showTab('squad')">Squad</button>
+  <button onclick="showTab('schedule')">Schedule</button>
+  <button onclick="showTab('match')">Match</button>
+  <button onclick="showTab('stats')">Stats</button>
+  <button onclick="showTab('standings')">Standings</button>
+  <button onclick="showTab('budget')">Budget</button>
+  <button onclick="showTab('history')">History</button>
+</div>
+
+<div id="content">
+  <div id="home" class="tab">Select your team to begin.</div>
+  <div id="auction" class="tab"></div>
+  <div id="squad" class="tab"></div>
+  <div id="schedule" class="tab"></div>
+  <div id="match" class="tab"></div>
+  <div id="stats" class="tab"></div>
+  <div id="standings" class="tab"></div>
+  <div id="budget" class="tab"></div>
+  <div id="history" class="tab"></div>
+</div>
+
+<script src="data/teams.js"></script>
+<script src="data/players.js"></script>
+<script src="engine/auction.js"></script>
+<script src="engine/matchEngine.js"></script>
+<script src="engine/stats.js"></script>
+<script src="engine/finance.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
+
+
+
+<div id="match" class="tab">
+  <h2>Match Center</h2>
+
+  <button onclick="playBallUI()">Play Ball</button>
+  <button onclick="playOverUI()">Play Over</button>
+  <button onclick="simulateFull()">Sim Match</button>
+
+  <h3>Commentary</h3>
+  <pre id="commentary"></pre>
+
+  <h3>Batting Scorecard</h3>
+  <table id="battingTable"></table>
+
+  <h3>Bowling Figures</h3>
+  <table id="bowlingTable"></table>
+</div>
+function renderHomePitchSelection(team) {
+  document.getElementById("home").innerHTML = `
+    <h2>${team.name}</h2>
+    <h3>${team.stadium}</h3>
+
+    <label>Prepare Pitch:</label>
+    <select onchange="setPitch(this.value)">
+      <option value="flat">Flat</option>
+      <option value="green">Green</option>
+      <option value="dusty">Dusty</option>
+    </select>
+  `;
+}
+
+function setPitch(pitch) {
+  userTeam.pitch = pitch;
+}
+function renderRetentionUI(team) {
+  let candidates = getRetentionCandidates(team);
+  let html = `<h2>Retain Players</h2>`;
+
+  candidates.slice(0, 8).forEach(p => {
+    html += `
+      <label>
+        <input type="checkbox" value="${p.name}">
+        ${p.name} (£${p.wage}m)
+      </label><br>
+    `;
+  });
+
+  html += `<button onclick="confirmRetentions()">Confirm</button>`;
+  document.getElementById("squad").innerHTML = html;
+}
+
