@@ -31,16 +31,26 @@
   <div id="history" class="tab"></div>
 </div>
 
-<script src="data/teams.js"></script>
-<script src="data/players.js"></script>
-<script src="engine/auction.js"></script>
-<script src="engine/matchEngine.js"></script>
-<script src="engine/stats.js"></script>
-<script src="engine/finance.js"></script>
+<link rel="stylesheet" href="style.css">
+
+<script src="teams.js"></script>
+<script src="players.js"></script>
+<script src="schedule.js"></script>
+
+<script src="auction.js"></script>
+<script src="matchEngine.js"></script>
+<script src="finance.js"></script>
+<script src="stats.js"></script>
+<script src="season.js"></script>
+<script src="pitch.js"></script>
+<script src="fitness.js"></script>
+<script src="injuries.js"></script>
+<script src="aging.js"></script>
+<script src="retirement.js"></script>
+<script src="retention.js"></script>
+
 <script src="app.js"></script>
 
-</body>
-</html>
 
 
 
@@ -93,4 +103,5 @@ function renderRetentionUI(team) {
   html += `<button onclick="confirmRetentions()">Confirm</button>`;
   document.getElementById("squad").innerHTML = html;
 }
+
 
